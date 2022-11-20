@@ -1,5 +1,5 @@
 const { User } = require("../models");
-const { AuthentencationError } = require("apollo-server-express") ;
+const { AuthenticationError } = require("apollo-server-express") ;
 const { signToken } = require("../utils/auth");
 
 const resolvers = {
@@ -20,18 +20,15 @@ const resolvers = {
     },
 
     Mutation: {
-        createUser: async ({email, username, password}) => {
+        createUser: async (parent, {username, email, password}) => {
             try {
-
-                const user = await User.create({email, username, password});
-
+                console.log(email, username, password);
+                const user = await User.create({username, email, password});
                 const token = signToken(user);
-
-
-                return { token, user }
+                return {token, user}
                 
             } catch (error) {
-                console.log(error);
+                return new AuthenticationError(error)
             }
         },
 
@@ -41,7 +38,7 @@ const resolvers = {
 
                 const checkPassword = await user.isCorrectPassword(password);
 
-                if(!checkPassword) throw new AuthentencationError("There was a system error with your request ")
+                if(!checkPassword) throw new AuthenticationError("There was a system error with your request ")
                 
                 const token = signToken(user);
 

@@ -19,6 +19,24 @@ export const GET_USER = gql`
     }
 `
 
+export const GET_ME = gql`
+    query me {
+        me {
+            _id
+            username
+            email
+            savedBooks {
+                authors
+                description
+                bookId
+                image
+                link
+                title
+            }
+        }
+    }
+`
+
 export const ADD_USER = gql`
     mutation createUser($username: String!, $email: String!, $password: String!){
         createUser(username: $username, email: $email, password: $password){

@@ -8,7 +8,7 @@ const resolvers = {
             try {
                 const foundUser = await User.findOne({_id});
     
-                if(!foundUser) throw new AuthentencationError("No user found.")
+                if(!foundUser) throw new AuthenticationError("No user found.")
     
                 return foundUser;
                 
@@ -16,6 +16,20 @@ const resolvers = {
                 console.log(error);
             }
         },
+        me: async (parent, args, context) => {
+            if(context.user) {
+                try {
+                    const foundUser = await User.findOne({_id: context.user._id});
+        
+                    if(!foundUser) throw new AuthenticationError("No user found.")
+        
+                    return foundUser;
+                    
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }
 
     },
 

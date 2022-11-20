@@ -34,7 +34,7 @@ function App() {
           <Navbar />
           <Routes>
             <Route path='/' element={<SearchBooks />} />
-            <Route path='/saved' element={SavedBooks} />
+            <Route path='/saved' element={<SavedBooks />} />
           </Routes>
         </>
       </Router>

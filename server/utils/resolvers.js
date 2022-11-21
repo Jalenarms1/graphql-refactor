@@ -1,5 +1,5 @@
 const { User } = require("../models");
-const { AuthentencationError } = require("apollo-server-express") ;
+const { AuthenticationError } = require("apollo-server-express") ;
 const { signToken } = require("../utils/auth");
 
 const resolvers = {
@@ -8,7 +8,7 @@ const resolvers = {
             try {
                 const foundUser = await User.findOne({_id});
     
-                if(!foundUser) throw new AuthentencationError("No user found.")
+                if(!foundUser) throw new AuthenticationError("No user found.")
     
                 return foundUser;
                 
@@ -16,22 +16,33 @@ const resolvers = {
                 console.log(error);
             }
         },
+        me: async (parent, args, context) => {
+            if(context.user) {
+                try {
+                    const foundUser = await User.findOne({_id: context.user._id});
+        
+                    if(!foundUser) throw new AuthenticationError("No user found.")
+        
+                    return foundUser;
+                    
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }
 
     },
 
     Mutation: {
-        createUser: async ({email, username, password}) => {
+        createUser: async (parent, {username, email, password}) => {
             try {
-
-                const user = await User.create({email, username, password});
-
+                console.log(email, username, password);
+                const user = await User.create({username, email, password});
                 const token = signToken(user);
-
-
-                return { token, user }
+                return {token, user}
                 
             } catch (error) {
-                console.log(error);
+                return new AuthenticationError(error)
             }
         },
 
@@ -41,7 +52,7 @@ const resolvers = {
 
                 const checkPassword = await user.isCorrectPassword(password);
 
-                if(!checkPassword) throw new AuthentencationError("There was a system error with your request ")
+                if(!checkPassword) throw new AuthenticationError("There was a system error with your request ")
                 
                 const token = signToken(user);
 
@@ -54,24 +65,18 @@ const resolvers = {
 
         saveBook: async (parent, {authors, description, bookId, image, link, title }, context) => { 
             try {
-                try {
-                    const updateUserBooks = await User.findOneAndUpdate(
-                        {_id: context.user._id},
-                        {$addToSet: { savedBooks: authors, description, bookId, image, link, title}},
-                        {new: true, runValidators: true}
-                    )
+                console.log("hello");
+                const updateUserBooks = await User.findOneAndUpdate(
+                    {_id: context.user._id},
+                    {$addToSet: { savedBooks: {authors, description, bookId, image, link, title}}},
+                    {new: true, runValidators: true}
+                )
 
-                    return updateUserBooks;
-                    
-                } catch (error) {
-                    return error
-                }
-
+                return updateUserBooks;
+                
             } catch (error) {
-                console.log(erorr);
-
                 return error
-            }
+            }  
         },
 
         deleteBook: async (parent, {bookId}, context) => {

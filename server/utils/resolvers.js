@@ -65,24 +65,18 @@ const resolvers = {
 
         saveBook: async (parent, {authors, description, bookId, image, link, title }, context) => { 
             try {
-                try {
-                    const updateUserBooks = await User.findOneAndUpdate(
-                        {_id: context.user._id},
-                        {$addToSet: { savedBooks: authors, description, bookId, image, link, title}},
-                        {new: true, runValidators: true}
-                    )
+                console.log("hello");
+                const updateUserBooks = await User.findOneAndUpdate(
+                    {_id: context.user._id},
+                    {$addToSet: { savedBooks: {authors, description, bookId, image, link, title}}},
+                    {new: true, runValidators: true}
+                )
 
-                    return updateUserBooks;
-                    
-                } catch (error) {
-                    return error
-                }
-
+                return updateUserBooks;
+                
             } catch (error) {
-                console.log(erorr);
-
                 return error
-            }
+            }  
         },
 
         deleteBook: async (parent, {bookId}, context) => {

@@ -11,7 +11,7 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-
+  console.log(searchedBooks);
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
@@ -38,12 +38,17 @@ const SearchBooks = () => {
 
       const { items } = await response.json();
 
+      // items.forEach(item => {
+      //   console.log(item.volumeInfo.authors[0])
+      // })
+
       const bookData = items.map((book) => ({
         bookId: book.id,
-        authors: book.volumeInfo.authors || ['No author to display'],
+        authors: book.volumeInfo.authors || ["Information unavailable"],
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
+        link: book.volumeInfo.infoLink
       }));
 
       setSearchedBooks(bookData);
@@ -52,7 +57,7 @@ const SearchBooks = () => {
       console.error(err);
     }
   };
-  const [saveBook, { err }] = useMutation(SAVE_BOOK);
+  const [saveBook, { err, data }] = useMutation(SAVE_BOOK);
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
@@ -66,9 +71,20 @@ const SearchBooks = () => {
     }
 
     try {
-      const { data } = saveBook({
-        variables: {...bookToSave}
+      console.log(bookToSave);
+      const { data } = await saveBook({
+        variables: {
+          bookId: bookToSave.bookId,
+          authors: bookToSave.authors,
+          description: bookToSave.description,
+          image: bookToSave.image,
+          title: bookToSave.title,
+          link: bookToSave.link
+
+        }
       })
+      
+      console.log(data);
 
       if (!data) {
         throw new Error('something went wrong!');
